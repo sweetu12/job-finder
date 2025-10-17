@@ -73,7 +73,7 @@ def fetch_jobright():
     except Exception as e:
         print("Jobright error:", e)
         return []
-
+"""
 def fetch_google_jobs():
     url = "https://serpapi.com/search.json"
     params = {
@@ -101,10 +101,10 @@ def fetch_google_jobs():
     except Exception as e:
         print("Google Jobs error:", e)
     return jobs
-
+"""
 # Collect from all sources
 all_jobs = []
-for fn in [fetch_jobright, fetch_google_jobs]:
+for fn in [fetch_jobright""", fetch_google_jobs"""]:
     all_jobs += fn()
 
 print(f"Fetched {len(all_jobs)} jobs total before GPT filtering.")
@@ -120,7 +120,7 @@ def filter_entry_level_jobs(jobs):
         desc = (job.get("title", "") + "\n" + job.get("snippet", ""))[:4000]
         prompt = f"""
 You are screening job postings. Respond ONLY with 'Yes' or 'No'.
-Keep only entry-level jobs (0–2 years experience).
+Keep only New grad and entry-level jobs (0–2 years experience).
 Remove jobs that:
 - Require security clearance or ITAR
 - Mention aerospace, defense, or military
