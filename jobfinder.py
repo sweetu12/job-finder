@@ -12,8 +12,6 @@ SERPAPI_KEY = os.environ.get("SERPAPI_KEY")
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
-# Google credentials.json path
-GOOGLE_CREDS_PATH = "credentials.json"
 
 KEYWORDS = ["mechanical","manufacturing","automation","robotics","Electromechanical"
             "CAD","SolidWorks","MATLAB","PLC","entry-level","GD&T","3D","Product Design"]
