@@ -75,6 +75,9 @@ all_jobs = []
 for fn in [fetch_jobright, fetch_greenhouse, fetch_google_jobs]:
     all_jobs += fn()
 
+# ⚡ Fix: remove non-dict entries (e.g., Greenhouse RSS strings)
+all_jobs = [j for j in all_jobs if isinstance(j, dict)]
+
 print(f"Fetched {len(all_jobs)} jobs total")
 
 # ===== KEYWORD SCORING =====
