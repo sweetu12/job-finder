@@ -15,7 +15,7 @@ GOOGLE_CREDS_JSON = os.environ["GOOGLE_CREDS_JSON"]
 
 # Keywords for filtering jobs
 KEYWORDS = ["mechanical","manufacturing","automation","robotics",
-            "CAD","SolidWorks","MATLAB","PLC","entry-level","co-op"]
+            "CAD","SolidWorks","MATLAB","PLC","entry-level"]
 
 # Google Sheet name
 SHEET_NAME = "JobFinderData"
@@ -77,6 +77,25 @@ for fn in [fetch_jobright, fetch_greenhouse, fetch_google_jobs]:
 
 # ⚡ Fix: remove non-dict entries (e.g., Greenhouse RSS strings)
 all_jobs = [j for j in all_jobs if isinstance(j, dict)]
+
+# --- Filter by posting time (last hour)
+from datetime import datetime, timezone, timedelta
+one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
+all_jobs = [j for j in all_jobs if j.get("date_posted") and datetime.fromisoformat(j["date_posted"].replace("Z", "+00:00")) >= one_hour_ago]
+
+# --- Filter by experience / clearance
+EXCLUDE_KEYWORDS = ["senior", "manager", "lead", "5+ years", "3-5 years", "clearance", "ITAR", "TS/SCI"]
+INCLUDE_KEYWORDS = ["entry-level", "new grad", "recent graduate", "0-2 years", "junior"]
+
+filtered_jobs = []
+for j in all_jobs:
+    text = (j.get("title","") + " " + j.get("snippet","")).lower()
+    if any(k.lower() in text for k in EXCLUDE_KEYWORDS):
+        continue
+    if any(k.lower() in text for k in INCLUDE_KEYWORDS):
+        filtered_jobs.append(j)
+
+all_jobs = filtered_jobs
 
 print(f"Fetched {len(all_jobs)} jobs total")
 
