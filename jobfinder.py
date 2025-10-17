@@ -26,7 +26,11 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Google Sheets via service account JSON from secret
 creds_dict = json.loads(GOOGLE_CREDS_JSON)
-creds = Credentials.from_service_account_info(creds_dict)
+scopes = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
 gs_client = gspread.authorize(creds)
 sheet = gs_client.open(SHEET_NAME).sheet1
 
@@ -46,7 +50,7 @@ def fetch_greenhouse():
     jobs = []
     for feed in rss_feeds:
         r = requests.get(feed)
-        jobs += r.text.split("data-mapped='true'")  # simple parse
+        jobs += r.text.split("data-mapped='true'")
     return jobs
 
 def fetch_google_jobs():
@@ -81,7 +85,7 @@ for j in all_jobs:
 top_kw = sorted(all_jobs, key=lambda x: x["kw_score"], reverse=True)[:30]
 
 # ===== GPT SCORING =====
-prompt = "Rate each job 0–100 for suitability for a recent Mechanical/Manufacturing/Mechatronics graduate:\n\n"
+prompt = "Rate each job 0–100 for suitability for a recent Mechanicalo/Manufacturing/Mechatronics graduate:\n\n"
 for i,j in enumerate(top_kw):
     prompt += f"{i+1}. {j['title']} at {j.get('company','')} ({j.get('location','')})\n{j.get('snippet','')}\n\n"
 
