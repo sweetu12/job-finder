@@ -1,7 +1,7 @@
 name: Job Finder Cron
 
-# Schedule: every hour 7AM–11PM, plus overnight once per hour 12AM–6AM
 on:
+  workflow_dispatch:   # allows manual runs
   schedule:
     - cron: '0 7-23 * * *'   # hourly 7AM–11PM
     - cron: '0 0-6 * * *'    # overnight hourly 12AM–6AM
@@ -10,20 +10,13 @@ jobs:
   run-jobfinder:
     runs-on: ubuntu-latest
     steps:
-      # 1️⃣ Checkout repo
       - uses: actions/checkout@v3
-
-      # 2️⃣ Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.10
-
-      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: pip install -r requirements.txt
-
-      # 4️⃣ Run jobfinder script
       - name: Run JobFinder
         run: python jobfinder.py
         env:
