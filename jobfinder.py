@@ -104,7 +104,7 @@ def fetch_google_jobs():
 """
 # Collect from all sources
 all_jobs = []
-for fn in [fetch_jobright""", fetch_google_jobs"""]:
+for fn in [fetch_jobright]:
     all_jobs += fn()
 
 print(f"Fetched {len(all_jobs)} jobs total before GPT filtering.")
