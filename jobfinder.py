@@ -49,7 +49,7 @@ def fetch_jobright():
         "country": "US",
         "job_type": ",".join(job_types),
         "experience_level": ",".join(experience_levels),
-        "posted_within": "1h"
+        "posted_within": "12h"
     }
 
     try:
