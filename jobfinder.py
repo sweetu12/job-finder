@@ -6,21 +6,27 @@ from openai import OpenAI
 import gspread
 from google.oauth2.service_account import Credentials
 
-# ===== CONFIG =====
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-SERPAPI_KEY = os.environ.get("SERPAPI_KEY")
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+# ===== CONFIG: Load all secrets from environment =====
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+SERPAPI_KEY = os.environ["SERPAPI_KEY"]
+TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
+TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
+GOOGLE_CREDS_JSON = os.environ["GOOGLE_CREDS_JSON"]
 
+# Keywords for filtering jobs
+KEYWORDS = ["mechanical","manufacturing","automation","robotics",
+            "CAD","SolidWorks","MATLAB","PLC","entry-level","co-op"]
 
-KEYWORDS = ["mechanical","manufacturing","automation","robotics","Electromechanical"
-            "CAD","SolidWorks","MATLAB","PLC","entry-level","GD&T","3D","Product Design"]
-
+# Google Sheet name
 SHEET_NAME = "JobFinderData"
 
 # ===== INIT APIs =====
+# OpenAI client
 client = OpenAI(api_key=OPENAI_API_KEY)
-creds = Credentials.from_service_account_file(GOOGLE_CREDS_PATH)
+
+# Google Sheets via service account JSON from secret
+creds_dict = json.loads(GOOGLE_CREDS_JSON)
+creds = Credentials.from_service_account_info(creds_dict)
 gs_client = gspread.authorize(creds)
 sheet = gs_client.open(SHEET_NAME).sheet1
 
@@ -40,7 +46,7 @@ def fetch_greenhouse():
     jobs = []
     for feed in rss_feeds:
         r = requests.get(feed)
-        jobs += r.text.split("data-mapped='true'")
+        jobs += r.text.split("data-mapped='true'")  # simple parse
     return jobs
 
 def fetch_google_jobs():
@@ -60,6 +66,7 @@ def fetch_google_jobs():
         pass
     return jobs
 
+# Collect jobs from all sources
 all_jobs = []
 for fn in [fetch_jobright, fetch_greenhouse, fetch_google_jobs]:
     all_jobs += fn()
@@ -83,7 +90,7 @@ resp = client.chat.completions.create(
     messages=[{"role":"user","content":prompt}],
 )
 
-print(resp.choices[0].message.content)
+print("GPT Scoring:\n", resp.choices[0].message.content)
 
 # ===== SAVE TO GOOGLE SHEETS =====
 df = pd.DataFrame(all_jobs)
@@ -93,5 +100,9 @@ sheet.append_rows(df.values.tolist())
 top5 = sorted(all_jobs, key=lambda x: x.get("kw_score",0), reverse=True)[:5]
 for job in top5:
     msg = f"🎯 {job['title']} - {job.get('company','')} ({job.get('location','')})\n{job.get('link','')}"
-    requests.post(f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
-                  data={"chat_id": TELEGRAM_CHAT_ID, "text": msg})
+    requests.post(
+        f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+        data={"chat_id": TELEGRAM_CHAT_ID, "text": msg}
+    )
+
+print("Telegram alerts sent!")
