@@ -9,14 +9,22 @@ on:
 jobs:
   run-jobfinder:
     runs-on: ubuntu-latest
+
     steps:
+      # 1️⃣ Checkout the repository
       - uses: actions/checkout@v3
+
+      # 2️⃣ Set up Python 3.10
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.10
+
+      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      # 4️⃣ Run JobFinder script
       - name: Run JobFinder
         run: python jobfinder.py
         env:
